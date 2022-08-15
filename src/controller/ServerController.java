@@ -21,8 +21,8 @@ public class ServerController {
 
                 Socket socket = serverSocket.accept();
 
-                Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-                alert.setContentText("New Client Connected");
+                /*Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                alert.setContentText("New Client Connected");*/
 
                 ClientHandler clientHandler = new ClientHandler(socket);
 
