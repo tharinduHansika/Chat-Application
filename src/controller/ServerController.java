@@ -23,6 +23,7 @@ public class ServerController {
 
                 /*Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
                 alert.setContentText("New Client Connected");*/
+                System.out.println("New Client Connected");
 
                 ClientHandler clientHandler = new ClientHandler(socket);
 
