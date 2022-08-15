@@ -1,5 +1,4 @@
-package controller;
-
+import controller.ServerController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
