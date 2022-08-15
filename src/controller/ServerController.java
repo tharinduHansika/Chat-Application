@@ -76,7 +76,7 @@ public class ServerController {
 
         // passing data via the controller
         try {
-            clientController controller = loader.getController();
+            ClientController controller = loader.getController();
             controller.initData(clientName.getText(),clientStage);
         }catch (NullPointerException e){
             System.out.println(e.getMessage());

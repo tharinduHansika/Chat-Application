@@ -3,104 +3,155 @@ package controller;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
+import javafx.fxml.FXML;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.input.InputMethodTextRun;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import util.Client;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
+import java.util.Timer;
 
 public class ClientController {
-    public JFXTextArea txtArea;
-    public JFXTextField txtMsg;
-    public JFXButton btnSend;
-    public JFXTextField txtUserName;
-    public JFXButton btnLogin;
-    private Socket socket;
-    private BufferedReader bufferedReader;
-    private BufferedWriter bufferedWriter;
-    private String userName;
+    @FXML
+    public JFXTextField msgField;
+    public VBox msgBox;
+    public ScrollPane scrollPane;
+    public AnchorPane mainPane;
+    public Pane emojiContainer;
 
-    public ClientController(Socket socket, String userName) {
+    // TODO : hv to encapsulate client
+    Client client;
+    String clientName;
+    Listener listener;
+    Stage stage;
+
+    // file handling
+    FileChooser fileChooser;
+
+    // data handling
+    byte[] payload;
+    byte[] header;
+
+    int mouseCounter = 0;
+
+
+    public void initialize() throws IOException {
+
+        Platform.runLater(() -> {
+            // add a listener for scrollbar to be at the end
+            msgBox.heightProperty().addListener(observable -> scrollPane.setVvalue(1D));
+            stage.setOnCloseRequest(e -> {
+                listener.stop();
+            });
+        });
+
+        Connect();
+
+    }
+
+    private void Connect() throws IOException {
+        client = new Client(clientName,"localhost",8080);
+
+        Timer timer = new Timer();
+        fileChooser = new FileChooser();
+
+        // TODO : open up a listener for server
         try {
-            this.socket = socket;
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
-            this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.userName = userName;
+            listener = new ListenerThread(new DataInputStream(client.getInputStream()),msgBox,timer);
+            timer.schedule(listener,0,1000);
         } catch (IOException e) {
-            closeEverything(socket, bufferedReader, bufferedWriter);
-        }
-    }
-
-    public void sendMassage() {
-        try {
-            bufferedWriter.write(userName);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-
-            //Scanner scanner = new Scanner(System.in);
-            while (socket.isConnected()) {
-                //String messageToSend = scanner.nextLine();
-                String messageToSend = txtMsg.getText();
-                bufferedWriter.write(userName + ":" + messageToSend);
-                bufferedWriter.newLine();
-                bufferedWriter.flush();
-            }
-        } catch (IOException e) {
-            closeEverything(socket, bufferedReader, bufferedWriter);
-        }
-    }
-
-    public void listenForMessage() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String msgFromGroup;
-
-                while (socket.isConnected()) {
-                    try {
-                        msgFromGroup = bufferedReader.readLine();
-                        System.out.println(msgFromGroup);
-                        txtArea.appendText(msgFromGroup);
-                    } catch (IOException e) {
-                        closeEverything(socket, bufferedReader, bufferedWriter);
-                    }
-                }
-            }
-        }).start();
-    }
-
-    public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
-        try{
-            if(bufferedReader != null){
-                bufferedReader.close();
-            }
-            if (bufferedWriter != null){
-                bufferedReader.close();
-            }
-            if (socket != null){
-                socket.close();
-            }
-        }catch (IOException e){
             e.printStackTrace();
         }
     }
 
-    public static void main(String args[]) throws IOException {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println("Enter your username for the group chat :");
-        String username = scanner.nextLine();
-        //String username = txtUserName.getText();
-        Socket socket = new Socket("localhost", 1234);
-        ClientController clientController = new ClientController(socket, username);
-        clientController.listenForMessage();
-        clientController.sendMassage();
+    public boolean sendMsg(String clientName) throws IOException, InterruptedException {
+
+        // TODO : bypass all the empty spaces after and before
+        if (!msgField.getText().equals("")){
+            String msg = clientName + " :\n" + msgField.getText();
+            payload = msg.getBytes(StandardCharsets.UTF_16);
+            int len = payload.length;
+
+            header = ByteBuffer.allocate(4).putInt(len).array();
+            byte[] frame = addAll(header,payload);
+
+            client.getOut().write(0);
+            client.getOut().write(frame);
+            client.getOut().flush();
+
+            return true;
+        } else return false;
+
+
     }
 
-    public void btnSendOnAction(ActionEvent actionEvent) {
-        sendMassage();
+
+    public void initData(String name, Stage stage) {
+        this.stage = stage;
+        this.clientName = name;
     }
 
-    public void btnLoginOnAction(ActionEvent actionEvent) {
+
+    // TODO : pass the file type before sending file
+    public void uploadPhoto(MouseEvent mouseEvent) throws IOException {
+
+        File selectedFile = fileChooser.showOpenDialog(stage);
+
+        if (selectedFile!=null) {
+
+            String[] res = selectedFile.getName().split("\\.");
+
+            BufferedImage finalImage = ImageIO.read(selectedFile);
+
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            ImageIO.write(finalImage, res[1], bout);
+
+            payload = bout.toByteArray();
+            header = ByteBuffer.allocate(4).putInt(payload.length).array();
+
+            byte[] frame = ArrayUtils.addAll(header,payload);
+
+            client.getOut().write(-1);
+            client.getOut().write(frame);
+
+            client.getOut().flush();
+
+        }
+
+    }
+
+    public void sendOnMousePressed(MouseEvent mouseEvent) throws IOException, InterruptedException {
+        if(sendMsg(clientName)){
+            msgField.clear();
+        }
+    }
+
+    public void sendOnEnter(KeyEvent keyEvent) throws IOException, InterruptedException {
+        if(keyEvent.getCode().equals(KeyCode.ENTER)){
+            if(sendMsg(clientName)){
+                msgField.clear();
+            }
+        }
+    }
+
+    public void openUpEmojiMenu(MouseEvent mouseEvent) throws IOException {
+        mouseCounter++;
+        emojiContainer.setVisible(mouseCounter % 2 == 1);
     }
 }
