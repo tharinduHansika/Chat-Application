@@ -73,7 +73,7 @@ public class ClientController {
 
         // TODO : open up a listener for server
         try {
-            listener = new ListenerThread(new DataInputStream(client.getInputStream()),msgBox,timer);
+            listener = new Listener(new DataInputStream(client.getInputStream()),msgBox,timer);
             timer.schedule(listener,0,1000);
         } catch (IOException e) {
             e.printStackTrace();
