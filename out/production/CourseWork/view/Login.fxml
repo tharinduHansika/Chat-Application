@@ -6,7 +6,7 @@
 
 <AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.ServerController">
    <children>
-      <JFXTextField fx:id="txtUserName" layoutX="92.0" layoutY="302.0" prefHeight="25.0" prefWidth="277.0" />
+      <JFXTextField fx:id="clientName" layoutX="92.0" layoutY="302.0" prefHeight="25.0" prefWidth="277.0" />
       <JFXButton layoutX="437.0" layoutY="302.0" onAction="#btnLoginOnAction" prefHeight="25.0" prefWidth="61.0" style="-fx-background-color: #3498db;" text="Login" textFill="WHITE" />
    </children>
 </AnchorPane>

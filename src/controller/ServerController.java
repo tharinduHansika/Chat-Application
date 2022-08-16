@@ -66,7 +66,7 @@ public class ServerController {
     public void btnLoginOnAction(ActionEvent actionEvent) throws IOException {
         // opening chat-area for client
         Stage clientStage = new Stage(StageStyle.DECORATED);
-        FXMLLoader loader = new FXMLLoader(this.getClass().getClassLoader().getResource("com/chatwithme/FXML/client.fxml"));
+        FXMLLoader loader = new FXMLLoader(this.getClass().getClassLoader().getResource("view/client.fxml"));
         Scene client = new Scene(loader.load());
 
         clientStage.setScene(client);

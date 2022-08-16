@@ -38,6 +38,10 @@ public class ClientController {
     public ScrollPane scrollPane;
     public AnchorPane mainPane;
     public Pane emojiContainer;
+    public JFXTextArea txtArea;
+    public JFXTextField txtMsg;
+    public JFXButton btnSend;
+    public JFXButton btnImage;
 
     // TODO : hv to encapsulate client
     Client client;
@@ -87,8 +91,8 @@ public class ClientController {
     public boolean sendMsg(String clientName) throws IOException, InterruptedException {
 
         // TODO : bypass all the empty spaces after and before
-        if (!msgField.getText().equals("")){
-            String msg = clientName + " :\n" + msgField.getText();
+        if (!txtMsg.getText().equals("")){
+            String msg = clientName + " :\n" + txtMsg.getText();
             payload = msg.getBytes(StandardCharsets.UTF_16);
             int len = payload.length;
 
@@ -157,5 +161,36 @@ public class ClientController {
     public void openUpEmojiMenu(MouseEvent mouseEvent) throws IOException {
         mouseCounter++;
         emojiContainer.setVisible(mouseCounter % 2 == 1);
+    }
+
+    public void btnSendOnAction(ActionEvent actionEvent) throws IOException, InterruptedException {
+        if(sendMsg(clientName)){
+            txtMsg.clear();
+        }
+    }
+
+    public void btnImageOnAction(ActionEvent actionEvent) throws IOException {
+        File selectedFile = fileChooser.showOpenDialog(stage);
+
+        if (selectedFile!=null) {
+
+            String[] res = selectedFile.getName().split("\\.");
+
+            BufferedImage finalImage = ImageIO.read(selectedFile);
+
+            ByteArrayOutputStream bout = new ByteArrayOutputStream();
+            ImageIO.write(finalImage, res[1], bout);
+
+            payload = bout.toByteArray();
+            header = ByteBuffer.allocate(4).putInt(payload.length).array();
+
+            byte[] frame = ArrayUtils.addAll(header,payload);
+
+            client.getOut().write(-1);
+            client.getOut().write(frame);
+
+            client.getOut().flush();
+
+        }
     }
 }
