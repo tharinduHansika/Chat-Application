@@ -1,8 +1,11 @@
 package controller;
 
+import static org.apache.commons.lang.ArrayUtils.addAll;
+import static org.apache.commons.lang.ArrayUtils.*;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXTextArea;
 import com.jfoenix.controls.JFXTextField;
+import Thread.ListenerThread;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,6 +19,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.commons.lang.ArrayUtils;
 import util.Client;
 
 import javax.imageio.ImageIO;
@@ -38,7 +42,7 @@ public class ClientController {
     // TODO : hv to encapsulate client
     Client client;
     String clientName;
-    Listener listener;
+    ListenerThread listener;
     Stage stage;
 
     // file handling
@@ -73,7 +77,7 @@ public class ClientController {
 
         // TODO : open up a listener for server
         try {
-            listener = new Listener(new DataInputStream(client.getInputStream()),msgBox,timer);
+            listener = new ListenerThread (new DataInputStream(client.getInputStream()),msgBox,timer);
             timer.schedule(listener,0,1000);
         } catch (IOException e) {
             e.printStackTrace();

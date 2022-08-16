@@ -2,12 +2,8 @@
   <library name="apache-commons-lang">
     <CLASSES>
       <root url="jar://$PROJECT_DIR$/lib/apache-commons-lang.jar!/" />
-      <root url="jar://$PROJECT_DIR$/lib/org.apache.commons.io.jar!/" />
-      <root url="file://$PROJECT_DIR$" />
     </CLASSES>
     <JAVADOC />
-    <SOURCES>
-      <root url="file://$PROJECT_DIR$/src" />
-    </SOURCES>
+    <SOURCES />
   </library>
 </component>

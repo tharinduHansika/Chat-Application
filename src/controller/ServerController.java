@@ -1,8 +1,8 @@
 package controller;
 
+import Thread.Flusher;
 import com.jfoenix.controls.JFXTextField;
 import com.sun.security.ntlm.NTLMException;
-import com.sun.security.ntlm.Server;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,6 +11,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import util.Server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -26,11 +27,11 @@ public class ServerController {
 
     Stage stage;
 
-    Server server;
+    util.Server server;
     Thread mainThread;
 
     Socket localSocket;
-    public static HashMap<Integer, DataOutputStream> clients = new HashMap<>();
+    public static HashMap<Integer,DataOutputStream> clients = new HashMap<>();
 
     public void initialize() throws IOException {
 
@@ -62,8 +63,7 @@ public class ServerController {
         });
     }
 
-    public void openUpClient(ActionEvent actionEvent) throws IOException {
-
+    public void btnLoginOnAction(ActionEvent actionEvent) throws IOException {
         // opening chat-area for client
         Stage clientStage = new Stage(StageStyle.DECORATED);
         FXMLLoader loader = new FXMLLoader(this.getClass().getClassLoader().getResource("com/chatwithme/FXML/client.fxml"));
@@ -90,4 +90,6 @@ public class ServerController {
     public void initData (Stage stage) {
         this.stage = stage;
     }
+
+
 }

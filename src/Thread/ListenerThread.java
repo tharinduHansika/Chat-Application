@@ -17,12 +17,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class Listener extends TimerTask {
+public class ListenerThread extends TimerTask {
     DataInputStream in;
     VBox msgArea;
     Timer timer;
 
-    public Listener(DataInputStream inputStream,VBox msgArea,Timer timer){
+    public ListenerThread(DataInputStream inputStream, VBox msgArea, Timer timer) {
         in = inputStream;
         this.msgArea = msgArea;
         this.timer = timer;
@@ -32,11 +32,11 @@ public class Listener extends TimerTask {
     public void run() {
 
         try {
-            if(in.available()>0){
+            if (in.available() > 0) {
 
                 stop();
 
-                if (in.readByte()==0){
+                if (in.readByte() == 0) {
                     byte[] header = new byte[4];
                     in.read(header);
 
@@ -51,7 +51,7 @@ public class Listener extends TimerTask {
                         msgArea.getChildren().add(msgLbl);
                     });
 
-                }else {
+                } else {
 
                     byte[] header = new byte[4];
                     in.read(header);
@@ -67,7 +67,7 @@ public class Listener extends TimerTask {
                     ByteArrayInputStream bis = new ByteArrayInputStream(payload);
                     BufferedImage imageData = ImageIO.read(bis);
 
-                    Image image = SwingFXUtils.toFXImage(imageData,null);
+                    Image image = SwingFXUtils.toFXImage(imageData, null);
                     ImageView view = new ImageView(image);
                     view.setFitHeight(250);
                     view.setFitWidth(250);
@@ -90,7 +90,7 @@ public class Listener extends TimerTask {
 
     private void resume() {
         Timer timer = new Timer();
-        timer.schedule(new Listener(in,msgArea,timer),0,1000);
+        timer.schedule(new ListenerThread(in, msgArea, timer), 0, 1000);
     }
 
     public void stop() {
